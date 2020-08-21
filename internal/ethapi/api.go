@@ -1815,6 +1815,12 @@ func (api *PublicMarlinAPI) SpamCheckBlock(ctx context.Context, hexBlock string)
 		// Invalid encoding
 		return false
 	}
+
+	if request.Block.Time() + 300 < uint64(time.Now().Unix()) {
+		// Block is older than 5 min
+		return false
+	}
+
 	if hash := types.CalcUncleHash(request.Block.Uncles()); hash != request.Block.UncleHash() {
 		// Invalid uncles
 		return false
