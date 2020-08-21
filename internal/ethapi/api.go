@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core"
@@ -1794,4 +1795,47 @@ type PublicMarlinAPI struct {
 // NewMarlinAPI creates a new tx service to support marlin nodes
 func NewMarlinAPI(b Backend) *PublicMarlinAPI {
 	return &PublicMarlinAPI{b}
+}
+
+type ethBackend interface {
+	ChainReader() consensus.ChainReader
+	Engine() consensus.Engine
+}
+
+type newBlockData struct {
+	Block *types.Block
+	TD    *big.Int
+}
+
+func (api *PublicMarlinAPI) SpamCheckBlock(ctx context.Context, hexBlock string) bool {
+	rlpBlock := common.FromHex(hexBlock)
+
+	var request newBlockData
+	if err := rlp.DecodeBytes(rlpBlock, &request); err != nil {
+		// Invalid encoding
+		return false
+	}
+	if hash := types.CalcUncleHash(request.Block.Uncles()); hash != request.Block.UncleHash() {
+		// Invalid uncles
+		return false
+	}
+	if hash := types.DeriveSha(request.Block.Transactions()); hash != request.Block.TxHash() {
+		// Invalid body
+		return false
+	}
+	if err := request.Block.Header().SanityCheck(); err != nil {
+		// Invalid sanity checks, mainly size of blocknumber, difficulty, extradata
+		// TODO: Is this needed if we are relying on PoW scarcity?
+		return false
+	}
+
+	backend := api.b.(ethBackend)
+	block := request.Block
+
+	// Verify header
+	if err := backend.Engine().VerifyHeader(backend.ChainReader(), block.Header(), true); err != nil {
+		return false
+	}
+
+	return true
 }
