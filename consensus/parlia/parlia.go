@@ -951,7 +951,7 @@ func (p *Parlia) distributeIncoming(val common.Address, state *state.StateDB, he
 			balance = balance.Sub(balance, rewards)
 		}
 	}
-	log.Info("distribute to validator contract", "block hash", header.Hash(), "amount", balance)
+	log.Debug("distribute to validator contract", "block hash", header.Hash(), "amount", balance)
 	return p.distributeToValidator(balance, val, state, header, chain, txs, receipts, receivedTxs, usedGas, mining)
 }
 
