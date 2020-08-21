@@ -1792,6 +1792,6 @@ type PublicMarlinAPI struct {
 }
 
 // NewMarlinAPI creates a new tx service to support marlin nodes
-func NewMarlinAPI(b Backend) *PublicTxPoolAPI {
+func NewMarlinAPI(b Backend) *PublicMarlinAPI {
 	return &PublicMarlinAPI{b}
 }
