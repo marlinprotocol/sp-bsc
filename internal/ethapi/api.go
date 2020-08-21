@@ -1786,3 +1786,12 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
 }
+
+type PublicMarlinAPI struct {
+	b Backend
+}
+
+// NewMarlinAPI creates a new tx service to support marlin nodes
+func NewMarlinAPI(b Backend) *PublicTxPoolAPI {
+	return &PublicMarlinAPI{b}
+}
