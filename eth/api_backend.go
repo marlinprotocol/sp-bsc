@@ -49,6 +49,10 @@ func (b *EthAPIBackend) ChainReader() consensus.ChainReader {
 	return b.eth.blockchain
 }
 
+func (b *EthAPIBackend) Engine() consensus.Engine {
+	return b.eth.engine
+}
+
 // ChainConfig returns the active chain configuration.
 func (b *EthAPIBackend) ChainConfig() *params.ChainConfig {
 	return b.eth.blockchain.Config()
